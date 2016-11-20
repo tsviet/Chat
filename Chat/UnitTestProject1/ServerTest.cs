@@ -27,6 +27,25 @@ namespace UnitTestChat
             server.SetPort(666);
             Assert.AreEqual(666, server.GetPort());
         }
+
+        [TestMethod]
+        public void GetServerNameFromServerExpectedLocalHost()
+        {
+            Assert.AreEqual("localhost", server.GetName());
+        }
+
+        [TestMethod]
+        public void SetServerNameFromServerExpectedLocalHost()
+        {
+            server.SetName("local");
+            Assert.AreEqual("local", server.GetName());
+        }
+
+        [TestMethod]
+        public void OpenServerSocketExpectedTrue()
+        {
+            Assert.IsTrue(server.OpenSocket());
+        }
     }
     
 }
