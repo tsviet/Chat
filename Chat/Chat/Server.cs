@@ -10,54 +10,38 @@ namespace Chat
 {
     public class Server
     {
-        private int port = 8032; //DefaultPort
-        private string name = "localhost";
-        private TcpClient clientSocket = default(TcpClient);
-        private TcpListener serverSocket;
+        private Dictionary<string, ChatRoom> chatrooms;
 
-        public int GetPort()
+        public Server()
         {
-            return port;
+            chatrooms = new Dictionary<string, ChatRoom>();
         }
 
-        public void SetPort(int v)
+        internal void AddRoom(ChatRoom chatroom)
         {
-            port = v;
+            chatrooms.Add(chatroom.GetName(), chatroom);
         }
 
-        public string GetName()
+        internal bool HasRoom(string name)
         {
-            return name;
+            return chatrooms.ContainsKey(name);
         }
 
-        public void SetName(string v)
+        internal void RemoveRoom(string id)
         {
-            name = v;
+            chatrooms.Remove(id);
         }
 
-        public bool OpenSocket()
+        //Connect user to a specific chatroom
+        internal void ConnectUser(string chatroom, string user)
         {
-            //Starts listening
-            TcpListener serverSocket = new TcpListener(Dns.GetHostEntry(name).AddressList[0], port);
-            serverSocket.Start();
-            Console.WriteLine(" >> Server Started");
-
-            //Open to accept clients request
-            
-            clientSocket = serverSocket.AcceptTcpClient();
-            //Console.WriteLine(" >> Accept connection from client");
-
-            return serverSocket.Server.IsBound;
+            foreach (var value in chatrooms.Values.Distinct())
+            {
+                if(value.GetName() == chatroom)
+                {
+                    value.AddUser(user);
+                }
+            }
         }
-
-        public TcpClient GetClient()
-        {
-            return clientSocket;
-        }
-        public TcpListener GetServerSocket()
-        {
-            return serverSocket;
-        }
-
     }
 }
