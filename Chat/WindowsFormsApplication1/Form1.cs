@@ -72,7 +72,6 @@ namespace WindowsFormsApplication1
 
         private void RPC(string command, string name)
         {
-           // if (string.IsNullOrWhiteSpace(name)) return; 
             NetworkStream serverStream = clientSocket.GetStream();
             byte[] outStream = Encoding.ASCII.GetBytes(command + "~" + name + "$");
             serverStream.Write(outStream, 0, outStream.Length);
@@ -93,7 +92,7 @@ namespace WindowsFormsApplication1
                 //Update list of rooms
                 listOfRooms.Items.Add(name);
                 //Update user list on roon create
-                userList.Items.Add(userName);
+                //userList.Items.Add(userName);
                 //Update current roomName with new chatroom
                 roomName = name;
                 //Post message to a log window
@@ -108,7 +107,18 @@ namespace WindowsFormsApplication1
                 {
                     chatMainWindow.Items.Add(m);
                 }
-            } else
+            }
+            else if (returndata.Contains("Users~"))
+            {
+                string mess = returndata.Replace("Users~", "");
+                string[] list = mess.Split(';');
+                userList.Items.Clear();
+                foreach (var m in list)
+                {
+                    userList.Items.Add(m);
+                }
+            }
+            else
             {
                 msg(returndata);
             }

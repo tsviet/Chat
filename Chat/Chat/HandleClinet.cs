@@ -60,21 +60,7 @@ namespace Chat
                         {
                             Server.AddMessage(userName, param);
                         }
-                       /* else
-                        {
-                            Server.AddMessage(userName, param);
-
-                            //Get list and send message
-                            var list = Server.GetMessageList();
-                            string res = "";
-
-                            foreach(var m in list)
-                            {
-                                res += m + ";";
-                            }
-                            SendResponce(networkStream, "Messages~" + res);
-
-                        }*/
+                     
                     }
                     //Create chat room
                     else if (dataFromClient.Contains("create~"))
@@ -84,7 +70,7 @@ namespace Chat
                             ChatRoom chatroom = new ChatRoom(param);
                             chatroom.AddUser(userName);
                             Server.AddRoom(chatroom);
-                            SendResponce(networkStream, "Created");
+                            //SendResponce(networkStream, "Created");
                         }
                         //Send error on existing chat room
                         else
@@ -114,11 +100,12 @@ namespace Chat
                         var users = Server.GetUserList();
                         users.CollectionChanged += (sender, e) =>
                         {
+                            Console.WriteLine("Adding user...");
                             if (e.Action == NotifyCollectionChangedAction.Add)
                             {
                                 string res = "";
 
-                                foreach (var m in ser)
+                                foreach (var m in users)
                                 {
                                     res += m + ";";
                                 }
