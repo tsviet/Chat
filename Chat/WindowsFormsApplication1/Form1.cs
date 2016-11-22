@@ -92,7 +92,7 @@ namespace WindowsFormsApplication1
                 //Update list of rooms
                 listOfRooms.Items.Add(name);
                 //Update user list on roon create
-                //userList.Items.Add(userName);
+                userList.Items.Add(userName);
                 //Update current roomName with new chatroom
                 roomName = name;
                 //Post message to a log window
@@ -124,6 +124,11 @@ namespace WindowsFormsApplication1
             }
 
             //return string.IsNullOrEmpty(returndata);
+        }
+
+        private void refreshUserList_Click(object sender, EventArgs e)
+        {
+            RPC("ListUsers", userName);
         }
     }
 }

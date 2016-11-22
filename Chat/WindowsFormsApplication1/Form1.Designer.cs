@@ -42,6 +42,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.chatMainWindow = new System.Windows.Forms.ListBox();
+            this.refreshUserList = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // sendMessage_textBox
@@ -169,11 +170,22 @@
             this.chatMainWindow.Size = new System.Drawing.Size(509, 329);
             this.chatMainWindow.TabIndex = 14;
             // 
+            // refreshUserList
+            // 
+            this.refreshUserList.Location = new System.Drawing.Point(86, 274);
+            this.refreshUserList.Name = "refreshUserList";
+            this.refreshUserList.Size = new System.Drawing.Size(75, 23);
+            this.refreshUserList.TabIndex = 15;
+            this.refreshUserList.Text = "Refresh";
+            this.refreshUserList.UseVisualStyleBackColor = true;
+            this.refreshUserList.Click += new System.EventHandler(this.refreshUserList_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(955, 525);
+            this.Controls.Add(this.refreshUserList);
             this.Controls.Add(this.chatMainWindow);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
@@ -211,6 +223,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ListBox chatMainWindow;
+        private System.Windows.Forms.Button refreshUserList;
     }
 }
 

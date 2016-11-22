@@ -70,7 +70,7 @@ namespace Chat
                             ChatRoom chatroom = new ChatRoom(param);
                             chatroom.AddUser(userName);
                             Server.AddRoom(chatroom);
-                            //SendResponce(networkStream, "Created");
+                            SendResponce(networkStream, "Created");
                         }
                         //Send error on existing chat room
                         else
@@ -93,11 +93,11 @@ namespace Chat
                                 {
                                     res += m + ";";
                                 }
-                                SendResponce(networkStream, "Messages~" + res);
+                                SendResponce(clientSocket.GetStream(), "Messages~" + res);
                             }
                         };
 
-                        var users = Server.GetUserList();
+                       /* var users = Server.GetUserList();
                         users.CollectionChanged += (sender, e) =>
                         {
                             Console.WriteLine("Adding user...");
@@ -111,7 +111,7 @@ namespace Chat
                                 }
                                 SendResponce(networkStream, "Users~" + res);
                             }
-                        };
+                        };*/
                     }
 
                 }
