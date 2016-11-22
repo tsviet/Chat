@@ -10,73 +10,29 @@ namespace Chat
 {
     class Program
     {
-        private static string userName = "";
         static void Main(string[] args)
         {
-
             TcpListener serverSocket = new TcpListener(Dns.GetHostEntry("localhost").AddressList[1], 8888);
-            int requestCount = 0;
             TcpClient clientSocket = default(TcpClient);
+            int counter = 0;
+
             serverSocket.Start();
-            Console.WriteLine(" >> Server Started");
-            clientSocket = serverSocket.AcceptTcpClient();
-            Console.WriteLine(" >> Accept connection from client");
-            requestCount = 0;
-            Server server = new Server();
+            Console.WriteLine(" >> " + "Server Started");
 
-            while ((true))
+            counter = 0;
+            while (true)
             {
-                try
-                {
-                    requestCount = requestCount + 1;
-                    NetworkStream networkStream = clientSocket.GetStream();
-                    byte[] bytesFrom = new byte[clientSocket.ReceiveBufferSize];
-                    networkStream.Read(bytesFrom, 0, clientSocket.ReceiveBufferSize);
-                    string dataFromClient = Encoding.ASCII.GetString(bytesFrom);
-                    dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
-
-                    string param = dataFromClient.Split('~')[1];
-                    //Create chatroom and name it and addcurrent user to it
-                    if (dataFromClient.Contains("SetUser~"))
-                    {
-                        userName = param;
-                    } else if (dataFromClient.Contains("create~"))
-                    {
-                        if (!server.HasRoom(param))
-                        {
-                            ChatRoom chatroom = new ChatRoom(param);
-                            chatroom.AddUser(userName);
-                            server.AddRoom(chatroom);
-                            SendResponce(networkStream, "Created");
-                        } else
-                        {
-                            SendResponce(networkStream, "Error: " + param + " exists.");
-                        }
-                    }                   
-                    else
-                    {
-                        SendResponce(networkStream, userName + " says: " + dataFromClient);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
+                counter += 1;
+                clientSocket = serverSocket.AcceptTcpClient();
+                Console.WriteLine(" >> " + "Client No:" + Convert.ToString(counter) + " started!");
+                HandleClinet client = new HandleClinet();
+                client.startClient(clientSocket, Convert.ToString(counter));
             }
 
             clientSocket.Close();
             serverSocket.Stop();
-            Console.WriteLine(" >> exit");
+            Console.WriteLine(" >> " + "exit");
             Console.ReadLine();
         }
-
-        public static void SendResponce(NetworkStream networkStream, string message)
-        {
-            string serverResponse = message;
-            Byte[] sendBytes = Encoding.ASCII.GetBytes(serverResponse);
-            networkStream.Write(sendBytes, 0, sendBytes.Length);
-            networkStream.Flush();
-        }
-
     }
 }

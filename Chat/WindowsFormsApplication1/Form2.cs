@@ -12,6 +12,8 @@ namespace Client
 {
     public partial class Form2 : Form
     {
+        public string ReturnValue1 { get; set; }
+
         public Form2()
         {
             InitializeComponent();
@@ -24,9 +26,9 @@ namespace Client
                 return;
             } else
             {
-                var form = new Form1(textBox1.Text);
-                form.Show();
-                //Close();
+                this.ReturnValue1 = textBox1.Text;
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
         }
     }

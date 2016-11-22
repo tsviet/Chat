@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -8,40 +9,66 @@ using System.Threading.Tasks;
 
 namespace Chat
 {
-    public class Server
+    public static class Server
     {
-        private Dictionary<string, ChatRoom> chatrooms;
+        private static Dictionary<string, ChatRoom> chatrooms = new Dictionary<string, ChatRoom>();
+        private static string activeChatRoom = "";
 
-        public Server()
-        {
-            chatrooms = new Dictionary<string, ChatRoom>();
-        }
 
-        internal void AddRoom(ChatRoom chatroom)
+        //Create room in a dictionary
+        internal static void AddRoom(ChatRoom chatroom)
         {
             chatrooms.Add(chatroom.GetName(), chatroom);
+            activeChatRoom = chatroom.GetName();
         }
 
-        internal bool HasRoom(string name)
+        //Check if room exist
+        internal static bool HasRoom(string name)
         {
-            return chatrooms.ContainsKey(name);
+            bool isHere = false;
+            if(chatrooms.Count > 0) { isHere = chatrooms.ContainsKey(name); }
+            return isHere;
         }
 
-        internal void RemoveRoom(string id)
+        //Delete room
+        internal static void RemoveRoom(string id)
         {
             chatrooms.Remove(id);
         }
 
         //Connect user to a specific chatroom
-        internal void ConnectUser(string chatroom, string user)
+        internal static void ConnectUser(string chatroom, string user)
         {
-            foreach (var value in chatrooms.Values.Distinct())
-            {
-                if(value.GetName() == chatroom)
-                {
-                    value.AddUser(user);
-                }
-            }
+            chatrooms[chatroom].AddUser(user);
+        }
+
+        //Add message to a room
+        internal static void AddMessage(string user, string param)
+        {
+            chatrooms[activeChatRoom].AddMessage(user + " says: " +param);
+        }
+
+        //Get list of messages
+        internal static ObservableCollection<string> GetMessageList()
+        {
+            return chatrooms[activeChatRoom].GetMesages();
+        }
+
+        //Get list of messages
+        internal static ObservableCollection<string> GetUserList()
+        {
+            return chatrooms[activeChatRoom].GetUserList();
+        }
+
+        //Getter for active chat room
+        internal static string GetActiveRoom() {
+            return activeChatRoom;
+        }
+
+        //Getter for active chat room
+        internal static ChatRoom GetCurrentChatRoom()
+        {
+            return chatrooms[activeChatRoom];
         }
     }
 }

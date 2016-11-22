@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.chatMainWindow_textBox = new System.Windows.Forms.TextBox();
             this.sendMessage_textBox = new System.Windows.Forms.TextBox();
             this.sendButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -42,15 +41,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.chatMainWindow = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
-            // 
-            // chatMainWindow_textBox
-            // 
-            this.chatMainWindow_textBox.Location = new System.Drawing.Point(180, 45);
-            this.chatMainWindow_textBox.Multiline = true;
-            this.chatMainWindow_textBox.Name = "chatMainWindow_textBox";
-            this.chatMainWindow_textBox.Size = new System.Drawing.Size(525, 327);
-            this.chatMainWindow_textBox.TabIndex = 0;
             // 
             // sendMessage_textBox
             // 
@@ -169,11 +161,20 @@
             this.label6.Text = "label6";
             this.label6.Visible = false;
             // 
+            // chatMainWindow
+            // 
+            this.chatMainWindow.FormattingEnabled = true;
+            this.chatMainWindow.Location = new System.Drawing.Point(183, 45);
+            this.chatMainWindow.Name = "chatMainWindow";
+            this.chatMainWindow.Size = new System.Drawing.Size(509, 329);
+            this.chatMainWindow.TabIndex = 14;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(955, 525);
+            this.Controls.Add(this.chatMainWindow);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -187,7 +188,6 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.sendButton);
             this.Controls.Add(this.sendMessage_textBox);
-            this.Controls.Add(this.chatMainWindow_textBox);
             this.Name = "Form1";
             this.Text = "Socket Chat 1.0";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -197,8 +197,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox chatMainWindow_textBox;
         private System.Windows.Forms.TextBox sendMessage_textBox;
         private System.Windows.Forms.Button sendButton;
         private System.Windows.Forms.Label label1;
@@ -212,6 +210,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ListBox chatMainWindow;
     }
 }
 

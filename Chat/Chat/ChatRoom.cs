@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,26 +10,34 @@ namespace Chat
     public class ChatRoom
     {
         
-        private List<string> userList;
+        private ObservableCollection<string> userList;
+        private ObservableCollection<string> messageList;
         private string name = "";
 
         //Create object
         public ChatRoom(string name)
         {
-            userList = new List<string>();
+            userList = new ObservableCollection<string>();
+            messageList = new ObservableCollection<string>();
             this.name = name;
         }
 
         //Get user list array
-        public List<string> GetUserList()
+        public ObservableCollection<string> GetUserList()
         {
             return userList;
         }
 
-        //Add user to chat room
-        public void AddUser(string user)
+        //Add message to chat room
+        public void AddMessage(string message)
         {
-            userList.Add(user);
+            messageList.Add(message);
+        }
+
+        //Get message list
+        public ObservableCollection<string> GetMesages()
+        {
+            return messageList;
         }
 
         //Get name of chatroom
@@ -43,5 +52,10 @@ namespace Chat
             userList.Remove(name);
         }
 
+        //Add user to a list
+        internal void AddUser(string user)
+        {
+            userList.Add(user);
+        }
     }
 }
