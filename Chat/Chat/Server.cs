@@ -32,6 +32,14 @@ namespace Chat
             return isHere;
         }
 
+        //Check if server exist
+        internal static bool ServerExist()
+        {
+            bool isHere = false;
+            if (chatrooms.Count > 0) { isHere = true; }
+            return isHere;
+        }
+
         //Delete room
         internal static void RemoveRoom(string id)
         {
@@ -57,6 +65,18 @@ namespace Chat
         }
 
         //Get list of messages
+        internal static ObservableCollection<string> GetMessageList(string Room)
+        {
+            return chatrooms[Room].GetMesages();
+        }
+
+        //Get list of messages
+        internal static ObservableCollection<string> GetUserList(string Room)
+        {
+            return chatrooms[Room].GetUserList();
+        }
+
+        //Get list of messages
         internal static ObservableCollection<string> GetUserList()
         {
             return chatrooms[activeChatRoom].GetUserList();
@@ -71,6 +91,12 @@ namespace Chat
         internal static ChatRoom GetCurrentChatRoom()
         {
             return chatrooms[activeChatRoom];
+        }
+
+        //Getter for room list
+        internal static Dictionary<string, ChatRoom> GetChatRoomList()
+        {
+            return chatrooms;
         }
     }
 }

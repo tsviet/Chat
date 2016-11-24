@@ -26,13 +26,14 @@ namespace Chat
                 clientSocket = serverSocket.AcceptTcpClient();
                 Console.WriteLine(" >> " + "Client No:" + Convert.ToString(counter) + " started!");
                 HandleClinet client = new HandleClinet();
-                client.startClient(clientSocket, Convert.ToString(counter));
+                client.startClient(clientSocket, ref counter);
             }
 
             clientSocket.Close();
             serverSocket.Stop();
             Console.WriteLine(" >> " + "exit");
             Console.ReadLine();
+
         }
     }
 }
