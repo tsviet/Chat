@@ -50,10 +50,17 @@ namespace WindowsFormsApplication1
 
         private void sendButton_Click(object sender, EventArgs e)
         {
-            //Send message and seve on a server
-            RPC("sendMessage", sendMessage_textBox.Text);
-            sendMessage_textBox.Text = "";
-            sendMessage_textBox.Focus();
+            if (comboBox1.Items.Count > 0)
+            {
+                //Send message and seve on a server
+                RPC("sendMessage", comboBox1.SelectedItem.ToString() + ";" + sendMessage_textBox.Text);
+                sendMessage_textBox.Text = "";
+                sendMessage_textBox.Focus();
+            }
+            else
+            {
+                msg("Choose room before sending messages!");
+            }
         }
 
         public void msg(string mesg)
@@ -95,6 +102,9 @@ namespace WindowsFormsApplication1
                     label6.Text = returndata;
                     serverStream.Flush();
 
+                    Thread tread = new Thread(turnOfErrorSent);
+                    tread.Start();
+
                 }
                 else if (returndata.Contains("Created"))
                 {
@@ -117,6 +127,18 @@ namespace WindowsFormsApplication1
                     foreach (var m in list)
                     {
                         chatMainWindow.Items.Add(m);
+                    }
+                    serverStream.Flush();
+                }
+                //UpdateDropDown~
+                else if (returndata.Contains("UpdateDropDown~"))
+                {
+                    string mess = returndata.Replace("UpdateDropDown~", "");
+                    string[] list = mess.Split(';');
+                    comboBox1.Items.Clear();
+                    foreach (var m in list)
+                    {
+                        comboBox1.Items.Add(m);
                     }
                     serverStream.Flush();
                 }
@@ -172,7 +194,14 @@ namespace WindowsFormsApplication1
             //Call method on different thread lambda function with no argument
             label7.Invoke((MethodInvoker)(() => label7.Visible = false));
         }
-        
+
+        private void turnOfErrorSent()
+        {
+            Thread.Sleep(1000); //Wait 1 sec
+            //Call method on different thread lambda function with no argument
+            label7.Invoke((MethodInvoker)(() => label6.Visible = false));
+        }
+
 
         private void refreshUserList_Click(object sender, EventArgs e)
         {
@@ -229,7 +258,7 @@ namespace WindowsFormsApplication1
         private void serverDisconnect_Click(object sender, EventArgs e)
         {
             //Check if client is connected
-            if (clientSocket.Connected)
+            if (clientSocket != null && clientSocket.Connected)
             {
                 RPC("DisconnectClient", "");
                 clientSocket.Close();
@@ -253,7 +282,9 @@ namespace WindowsFormsApplication1
             {
                 try
                 {
-                    RPC("JoinRoom", userName + ";" + listOfRooms.SelectedItem.ToString());
+                    foreach (var item in listOfRooms.SelectedItems) {
+                        RPC("JoinRoom", userName + ";" + item.ToString());
+                    }
                 }
                 catch (Exception)
                 {
@@ -269,7 +300,11 @@ namespace WindowsFormsApplication1
             {
                 try
                 {
-                    RPC("LeaveRoom", userName + ";" + listOfRooms.SelectedItem.ToString());
+                    //RPC("LeaveRoom", userName + ";" + listOfRooms.SelectedItem.ToString());
+                    foreach (var item in listOfRooms.SelectedItems)
+                    {
+                        RPC("LeaveRoom", userName + ";" + item.ToString());
+                    }
                 }
                 catch (Exception)
                 {
@@ -283,6 +318,14 @@ namespace WindowsFormsApplication1
             if (clientSocket.Connected)
             {
                 RPC("RefreshCurrentRoom", "");
+            }
+        }
+
+        private void comboBox1_Click(object sender, EventArgs e)
+        {
+            if (clientSocket.Connected)
+            {
+                RPC("UpdateDropDown", userName);
             }
         }
     }

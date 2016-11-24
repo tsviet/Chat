@@ -51,6 +51,8 @@
             this.refreshRooms = new System.Windows.Forms.Button();
             this.leaveRoom = new System.Windows.Forms.Button();
             this.refreshMainChat = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // sendMessage_textBox
@@ -85,6 +87,7 @@
             this.listOfRooms.FormattingEnabled = true;
             this.listOfRooms.Location = new System.Drawing.Point(727, 49);
             this.listOfRooms.Name = "listOfRooms";
+            this.listOfRooms.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.listOfRooms.Size = new System.Drawing.Size(190, 147);
             this.listOfRooms.TabIndex = 4;
             // 
@@ -267,11 +270,32 @@
             this.refreshMainChat.UseVisualStyleBackColor = true;
             this.refreshMainChat.Click += new System.EventHandler(this.refreshMainChat_Click);
             // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.Location = new System.Drawing.Point(40, 423);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.Sorted = true;
+            this.comboBox1.TabIndex = 24;
+            this.comboBox1.Click += new System.EventHandler(this.comboBox1_Click);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(40, 403);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(72, 13);
+            this.label9.TabIndex = 25;
+            this.label9.Text = "Choose room:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(955, 525);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.refreshMainChat);
             this.Controls.Add(this.leaveRoom);
             this.Controls.Add(this.refreshRooms);
@@ -327,6 +351,8 @@
         private System.Windows.Forms.Button refreshRooms;
         private System.Windows.Forms.Button leaveRoom;
         private System.Windows.Forms.Button refreshMainChat;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label9;
     }
 }
 

@@ -53,13 +53,14 @@ namespace Chat
                     //Add message to chatroom data structure
                     else if (dataFromClient.Contains("sendMessage~"))
                     {
-                        if (string.IsNullOrEmpty(Server.GetActiveRoom()))
+                        string[] res = param.Split(';');
+                        if (string.IsNullOrEmpty(res[0]) || string.IsNullOrWhiteSpace(res[0]))
                         {
-                            SendResponce(networkStream, "Error: there is no active room available... create one first!");
+                            SendResponce(networkStream, "Choose room on a left or create one!");
                         }
                         else
                         {
-                            Server.AddMessage(userName, param);
+                            Server.GetMessageList(res[0]).Add(userName + " says: " + res[1]); 
                             SendResponce(networkStream, "202.OK");
                         }
 
@@ -98,6 +99,10 @@ namespace Chat
                             }
                             SendResponce(networkStream, "Messages~" + res);
                         }
+                        else
+                        {
+                            SendResponce(networkStream, "No chat room exist!");
+                        }
                     }
                     else if (dataFromClient.Contains("RefreshRooms~"))
                     {
@@ -110,6 +115,10 @@ namespace Chat
                                 res += m.Value.GetName() + ";";
                             }
                             SendResponce(networkStream, "ChatRoomsNames~" + res);
+                        }
+                        else
+                        {
+                            SendResponce(networkStream, "No chat room exist!");
                         }
                     }
                     else if (dataFromClient.Contains("RefreshCurrentRoom~"))
@@ -124,6 +133,10 @@ namespace Chat
                             }
                             SendResponce(networkStream, "RefreshCurrentRoom~" + res);
                         }
+                        else
+                        {
+                            SendResponce(networkStream, "No chat room exist!");
+                        }
                     }
 
                     else if (dataFromClient.Contains("ListUsers~"))
@@ -137,6 +150,10 @@ namespace Chat
                                 res += m + ";";
                             }
                             SendResponce(networkStream, "ListUsers~" + res);
+                        }
+                        else
+                        {
+                            SendResponce(networkStream, "No chat room exist!");
                         }
                     }
                     else if (dataFromClient.Contains("JoinRoom~"))
@@ -155,6 +172,31 @@ namespace Chat
                                 SendResponce(networkStream, "User " + res[0] + " joined room " + res[1]);
                             }
                         }
+                        else
+                        {
+                            SendResponce(networkStream, "No chat room exist!");
+                        }
+                    }
+
+                    else if (dataFromClient.Contains("UpdateDropDown~"))
+                    {
+                        if (Server.ServerExist())
+                        {
+                            string res = "";
+                            foreach (var room in Server.GetChatRoomList().Values)
+                            {
+                                if (room.GetUserList().Contains(param))
+                                {
+                                    res += room.GetName() + ";";
+                                }
+                                
+                            }
+                            SendResponce(networkStream, "UpdateDropDown~" + res);
+                        }
+                        else
+                        {
+                            SendResponce(networkStream, "No chat room exist!");
+                        }
                     }
 
                     else if (dataFromClient.Contains("LeaveRoom~"))
@@ -172,45 +214,14 @@ namespace Chat
                                 SendResponce(networkStream, "Can't leave room user " + res[1] + " not in this room " + res[0]);
                             }
                         }
+                        else
+                        {
+                            SendResponce(networkStream, "No chat room exist!");
+                        }
                     }
-
-                    /* //On Add to message list update all threads chat window
-                     if (Server.HasRoom(param))
-                     {
-                         var ser = Server.GetMessageList();
-                         ser.CollectionChanged += (sender, e) =>
-                         {
-                             if (e.Action == NotifyCollectionChangedAction.Add)
-                             {
-                                 string res = "";
-
-                                 foreach (var m in Server.GetMessageList())
-                                 {
-                                     res += m + ";";
-                                 }
-                                 SendResponce(clientSocket.GetStream(), "Messages~" + res);
-                             }
-                         };
-
-                         var users = Server.GetUserList();
-                         users.CollectionChanged += (sender, e) =>
-                         {
-                             Console.WriteLine("Adding user...");
-                             if (e.Action == NotifyCollectionChangedAction.Add)
-                             {
-                                 string res = "";
-
-                                 foreach (var m in users)
-                                 {
-                                     res += m + ";";
-                                 }
-                                 SendResponce(networkStream, "Users~" + res);
-                             }
-                         };
-                     }*/
-
+                    
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     clientSocket.Close();
                     Console.WriteLine("Client " + clNo + " disconnected!!");
