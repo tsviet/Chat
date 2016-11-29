@@ -140,7 +140,7 @@ namespace Chat
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //Console.WriteLine(ex.ToString());
                     clientSocket.Close();
@@ -301,8 +301,9 @@ namespace Chat
         }
 
         private void SendMessage(Message responce)
-        {  
-            Server.GetMessageList(responce.other).Add(userName + " says: " + responce.message[0]);
+        {
+            Server.SetActiveChatRoom(responce.other);
+            Server.GetMessageList(responce.other).Add(responce.message[0]);
             IPC(Command.OK);
         }
     }

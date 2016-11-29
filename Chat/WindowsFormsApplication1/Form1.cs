@@ -101,9 +101,9 @@ namespace WindowsFormsApplication1
 
         private void sendButton_Click(object sender, EventArgs e)
         {
-            if (comboBox1.Items.Count > 0)
+            if (comboBox1.Items.Count > 0 && comboBox1.SelectedIndex >= 0)
             {
-                Client.Message responce = IPC(Command.SendMessage, sendMessage_textBox.Text, comboBox1.SelectedItem.ToString());
+                Client.Message responce = IPC(Command.SendMessage, userName + " says: " + sendMessage_textBox.Text, comboBox1.SelectedItem.ToString());
 
                 sendMessage_textBox.Text = "";
                 sendMessage_textBox.Focus();
@@ -150,10 +150,6 @@ namespace WindowsFormsApplication1
             }
             else if (responce != null && responce.command.HasFlag(Command.OK))
             {
-                //Update list of rooms
-                //listOfRooms.Items.Add(name);
-                //Update user list on roon create
-                //userList.Items.Add(userName);
                 //Update current roomName with new chatroom
                 roomName = createRoom_textBox.Text;
                 //Post message to a log window
@@ -254,7 +250,15 @@ namespace WindowsFormsApplication1
                 foreach (var item in listOfRooms.SelectedItems)
                 {
                     Client.Message responce = IPC(Command.JoinRoom, userName, item.ToString());
-                    if(responce != null && !responce.command.HasFlag(Command.OK)) msg("Error: unnable to add you to selected room!");
+                    if (responce != null && responce.command.HasFlag(Command.Error))
+                    {
+                        msg("You are already in the room " + item.ToString());
+                    }
+                    else
+                    {
+                        msg("User " + userName + " joined room " + item.ToString());
+                    }
+
                 }
             }
             catch (Exception)

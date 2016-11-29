@@ -24,6 +24,12 @@ namespace Chat
             activeChatRoom = chatroom.GetName();
         }
 
+        //Set current chat room
+        internal static void SetActiveChatRoom(string name)
+        {
+            activeChatRoom = name;
+        }
+
         //Check if room exist
         internal static bool HasRoom(string name)
         {
