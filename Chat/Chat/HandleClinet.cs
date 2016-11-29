@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Chat
@@ -13,6 +14,13 @@ namespace Chat
         TcpClient clientSocket;
         private static string userName = "";
         int clNo;
+
+        public enum Command
+        {
+            NotConnected,
+            Error, 
+            OK //Server done operation successfully
+        };
 
         public void startClient(TcpClient inClientSocket, ref int clineNo)
         {
@@ -51,6 +59,21 @@ namespace Chat
                         SendResponce(networkStream, "OK");
                     }
                     //Add message to chatroom data structure
+                   /* else if (dataFromClient.Contains("sendMessage~@"))
+                    {
+                        string[] res = param.Split(';');
+                        if (string.IsNullOrEmpty(res[0]) || string.IsNullOrWhiteSpace(res[0]))
+                        {
+                            SendResponce(networkStream, "Choose room on a left or create one!");
+                        }
+                        else
+                        {
+                            var sendTo = Regex.Match(res[0], @"(is?)@(\w+) ").Groups[1].Value;
+                            Server.GetMessageList(res[0]).Add(userName + " says: " + res[1]); 
+                            SendResponce(networkStream, "202.OK");
+                        }
+
+                    }*/
                     else if (dataFromClient.Contains("sendMessage~"))
                     {
                         string[] res = param.Split(';');
@@ -60,7 +83,7 @@ namespace Chat
                         }
                         else
                         {
-                            Server.GetMessageList(res[0]).Add(userName + " says: " + res[1]); 
+                            Server.GetMessageList(res[0]).Add(userName + " says: " + res[1]);
                             SendResponce(networkStream, "202.OK");
                         }
 

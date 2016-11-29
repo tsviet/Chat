@@ -17,11 +17,26 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        TcpClient clientSocket = new TcpClient();
-        NetworkStream serverStream = null;
+        Messages messages = new Messages();
         private string userName = "";
-        private string roomName = "";
-        private string[] server;
+        private string roomName;
+
+        public enum Command
+        {
+            NotConnected,
+            Error, //Error send by a server with error code
+            OK, //Server done operation successfully
+            SendMessage, //User sending message using button send
+            Create, //Create chat room 
+            RefreshCurrentRoom, //Get list of messages from a server
+            UpdateDropDown, //Get list of rooms current user connected
+            ListUsers, //Get user list connected to a current room
+            SetUser, //Set username to server
+            DisconnectClient, //Client request to be disconnected from a server
+            RefreshRooms, //Client request list of rooms existing on a server
+            JoinRoom, //Client wants to join a room
+            LeaveRoom //Client wants to leave a room
+        };
 
         public Form1()
         {
@@ -47,15 +62,61 @@ namespace WindowsFormsApplication1
             //tread.Start();
             //Todo: Update roomlist and userlist from the server 
         }
+        private Client.Message IPC(Command command, string message)
+        {
+            //Create message object and setup values
+            Client.Message request = new Client.Message();
+            request.command = command;
+            request.message = new List<string>() { message };
+
+            //Send message and seve on a server and recieve message from a server
+            return messages.RPC(request);
+        }
+
+        private Client.Message IPC(Command command, string message, string other)
+        {
+            //Create message object and setup values
+            Client.Message request = new Client.Message();
+            request.command = command;
+            request.message = new List<string>() { message };
+            request.other = other;
+
+            //Send message and seve on a server and recieve message from a server
+            return messages.RPC(request);
+        }
+
+        //Run form and set user
+        private void SetUser()
+        {
+            using (var form = new Form2())
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    string val = form.ReturnValue1;            //values preserved after close
+                    userName = val;
+                }
+            }
+        }
 
         private void sendButton_Click(object sender, EventArgs e)
         {
             if (comboBox1.Items.Count > 0)
             {
-                //Send message and seve on a server
-                RPC("sendMessage", comboBox1.SelectedItem.ToString() + ";" + sendMessage_textBox.Text);
+                Client.Message responce = IPC(Command.SendMessage, sendMessage_textBox.Text, comboBox1.SelectedItem.ToString());
+
                 sendMessage_textBox.Text = "";
                 sendMessage_textBox.Focus();
+
+                if (responce.command.HasFlag(Command.OK))
+                {
+                    //Message Sent
+                    label7.Visible = true;
+                    label7.Text = "Message sent!";
+
+                    Thread tread = new Thread(turnOfMessageSent);
+                    tread.Start();
+                }
             }
             else
             {
@@ -68,126 +129,40 @@ namespace WindowsFormsApplication1
             chatMainWindow.Items.Add(">> " + mesg);
         }
 
-        private void userList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
-
         //Create room button click
         private void createRoom_Click(object sender, EventArgs e)
         {
             //Send create message to a server
             //chatMainWindow.Items.Add("User name : " + userName);
             if (string.IsNullOrWhiteSpace(createRoom_textBox.Text)) return;
-            RPC("create", createRoom_textBox.Text);
-        }
+            
+            Client.Message responce = IPC(Command.Create, createRoom_textBox.Text);
 
-        public string RPC(string command, string name)
-        {
-            string ret = "";
-            try
+            if(responce.command == Command.NotConnected) { msg("Connect to server first!"); return; }
+            if (responce.command == Command.Error)
             {
-                //Made this code save for threads
-                byte[] outStream = Encoding.ASCII.GetBytes(command + "~" + name + "$");
-                serverStream.Write(outStream, 0, outStream.Length);
-                serverStream.Flush();
+                label6.Visible = true;
+                label6.Text = "Room already exist!";
 
-                byte[] inStream = new byte[clientSocket.ReceiveBufferSize];
-                serverStream.Read(inStream, 0, clientSocket.ReceiveBufferSize);
-                string returndata = Encoding.UTF8.GetString(inStream);
+                Thread tread = new Thread(turnOfErrorSent);
+                tread.Start();
 
-                if (command.Contains("create") && returndata.Contains("Error"))
-                {
-                    label6.Visible = true;
-                    label6.Text = returndata;
-                    serverStream.Flush();
-
-                    Thread tread = new Thread(turnOfErrorSent);
-                    tread.Start();
-
-                }
-                else if (returndata.Contains("Created"))
-                {
-                    //Update list of rooms
-                    //listOfRooms.Items.Add(name);
-                    //Update user list on roon create
-                    //userList.Items.Add(userName);
-                    //Update current roomName with new chatroom
-                    roomName = name;
-                    //Post message to a log window
-                    msg("Chat room : " + name + " were created!");
-                    serverStream.Flush();
-
-                }
-                else if (returndata.Contains("RefreshCurrentRoom~"))
-                {
-                    string mess = returndata.Replace("RefreshCurrentRoom~", "");
-                    string[] list = mess.Split(';');
-                    chatMainWindow.Items.Clear();
-                    foreach (var m in list)
-                    {
-                        chatMainWindow.Items.Add(m);
-                    }
-                    serverStream.Flush();
-                }
-                //UpdateDropDown~
-                else if (returndata.Contains("UpdateDropDown~"))
-                {
-                    string mess = returndata.Replace("UpdateDropDown~", "");
-                    string[] list = mess.Split(';');
-                    comboBox1.Items.Clear();
-                    foreach (var m in list)
-                    {
-                        comboBox1.Items.Add(m);
-                    }
-                    serverStream.Flush();
-                }
-                else if (returndata.Contains("ListUsers~"))
-                {
-                    string mess = returndata.Replace("ListUsers~", "");
-                    string[] list = mess.Split(';');
-                    userList.Items.Clear();
-                    foreach (var m in list)
-                    {
-                        userList.Items.Add(m);
-                    }
-                    serverStream.Flush();
-                }
-                //ChatRoomsNames~
-                else if (returndata.Contains("ChatRoomsNames~"))
-                {
-                    string mess = returndata.Replace("ChatRoomsNames~", "");
-                    string[] list = mess.Split(';');
-                    listOfRooms.Items.Clear();
-                    foreach (var m in list)
-                    {
-                        listOfRooms.Items.Add(m);
-                    }
-                    serverStream.Flush();
-                }
-                else if (returndata.Contains("202.OK"))
-                {
-                    //Message Sent
-                    label7.Visible = true;
-                    label7.Text = "Message sent!";
-
-                    Thread tread = new Thread(turnOfMessageSent);
-                    tread.Start();
-                }
-                else
-                {
-                    msg(returndata);
-                    ret = returndata;
-                    serverStream.Flush();
-                }
-            }catch(Exception)
-            {
-                clientSocket.Close();
-                msg("Server stoped!!!");
             }
-            return ret;
+            else if (responce.command.HasFlag(Command.OK))
+            {
+                //Update list of rooms
+                //listOfRooms.Items.Add(name);
+                //Update user list on roon create
+                //userList.Items.Add(userName);
+                //Update current roomName with new chatroom
+                roomName = createRoom_textBox.Text;
+                //Post message to a log window
+                msg("Chat room : " + roomName + " were created!");
+
+            }
         }
 
+        
         private void turnOfMessageSent()
         {
             Thread.Sleep(1000); //Wait 1 sec
@@ -205,128 +180,125 @@ namespace WindowsFormsApplication1
 
         private void refreshUserList_Click(object sender, EventArgs e)
         {
-            //Check if client is connected
-            if (clientSocket.Connected)
-            {
-                RPC("ListUsers", userName);
-            }
-        }
 
-        //Run form and set user
-        private void SetUser()
-        {
-            using (var form = new Form2())
+            Client.Message responce = IPC(Command.ListUsers, userName);
+
+            if (responce.command.HasFlag(Command.OK))
             {
-                var result = form.ShowDialog();
-                if (result == DialogResult.OK)
+                List<string> mess = responce.message;
+                userList.Items.Clear();
+                foreach (var m in mess)
                 {
-                    string val = form.ReturnValue1;            //values preserved after close
-                    userName = val;
+                    userList.Items.Add(m);
                 }
+
             }
         }
 
         private void serverConnect_Click(object sender, EventArgs e)
         {
-            try
+            
+            string resp = messages.Connect(serverNamePort.Text.Split(':'));
+            Client.Message responce;
+            msg(resp);
+            if (resp.Contains("connected"))
             {
-                //Check if client is connected
-                if (!clientSocket.Connected)
+                do
                 {
-                    clientSocket = new TcpClient(); //Create TcpClient obj
-                    server = serverNamePort.Text.Split(':');
-                    clientSocket.Connect(server[0], int.Parse(server[1]));
-                    serverStream = clientSocket.GetStream();
-                    msg("Server " + serverNamePort.Text + " started!");
                     SetUser();
-                    while (!RPC("SetUser", userName).Contains("OK"))
-                    {
-                        SetUser();
-                    }
+                    responce = IPC(Command.SetUser, userName);
 
-                } else
-                {
-                    msg("Server " + server.First() + " is connected disconnect first to connect to another server!!!");
-                }
-            }
-            catch (Exception)
-            {
-                msg("Can't connect to a server!!!");
+                } while (!responce.command.HasFlag(Command.OK));
+
             }
         }
 
         private void serverDisconnect_Click(object sender, EventArgs e)
         {
-            //Check if client is connected
-            if (clientSocket != null && clientSocket.Connected)
+            Client.Message responce = IPC(Command.DisconnectClient, userName);
+            if (responce.command.HasFlag(Command.OK))
             {
-                RPC("DisconnectClient", "");
-                clientSocket.Close();
-                msg("Server " + server.First() + " stoped!");
+                msg("You were disconected from server !");
             }
         }
 
         private void refreshRooms_Click(object sender, EventArgs e)
         {
-            //Check if client is connected
-            if (clientSocket.Connected)
+            Client.Message responce = IPC(Command.RefreshRooms, userName);
+            if (responce.command.HasFlag(Command.OK))
             {
-                RPC("RefreshRooms", "");
+                listOfRooms.Items.Clear();
+                foreach (var m in responce.message)
+                {
+                    listOfRooms.Items.Add(m);
+                }
             }
         }
 
         private void joinButton_Click(object sender, EventArgs e)
         {
-            //Check if client is connected
-            if (clientSocket.Connected)
+            try
             {
-                try
+                foreach (var item in listOfRooms.SelectedItems)
                 {
-                    foreach (var item in listOfRooms.SelectedItems) {
-                        RPC("JoinRoom", userName + ";" + item.ToString());
-                    }
+                    Client.Message responce = IPC(Command.JoinRoom, userName, item.ToString());
+                    if(!responce.command.HasFlag(Command.OK)) msg("Error: unnable to add you to selected room!");
                 }
-                catch (Exception)
-                {
-                    msg("Choose room first!");
-                }
+            }
+            catch (Exception)
+            {
+                msg("Error: Choose room first!");
             }
         }
 
         private void leaveRoom_Click(object sender, EventArgs e)
         {
-            //Check if client is connected
-            if (clientSocket.Connected)
+            try
             {
-                try
+                foreach (var item in listOfRooms.SelectedItems)
                 {
-                    //RPC("LeaveRoom", userName + ";" + listOfRooms.SelectedItem.ToString());
-                    foreach (var item in listOfRooms.SelectedItems)
-                    {
-                        RPC("LeaveRoom", userName + ";" + item.ToString());
-                    }
+                    Client.Message responce = IPC(Command.LeaveRoom, userName, item.ToString());
+                    if (!responce.command.HasFlag(Command.OK)) msg("Error: unnable to leave selected room!");
                 }
-                catch (Exception)
-                {
-                    msg("Choose room first!");
-                }
+            }
+            catch (Exception)
+            {
+                msg("Choose room first!");
             }
         }
 
         private void refreshMainChat_Click(object sender, EventArgs e)
         {
-            if (clientSocket.Connected)
+            Client.Message responce = IPC(Command.RefreshCurrentRoom, userName);
+            if (responce.command.HasFlag(Command.OK))
             {
-                RPC("RefreshCurrentRoom", "");
+                chatMainWindow.Items.Clear();
+                foreach (var m in responce.message)
+                {
+                    chatMainWindow.Items.Add(m);
+                }
             }
         }
 
         private void comboBox1_Click(object sender, EventArgs e)
         {
-            if (clientSocket.Connected)
+            Client.Message responce = IPC(Command.UpdateDropDown, userName);
+            if (responce.command.HasFlag(Command.OK))
             {
-                RPC("UpdateDropDown", userName);
+                comboBox1.Items.Clear();
+                foreach (var m in responce.message)
+                {
+                    comboBox1.Items.Add(m);
+                }
             }
         }
+
+       /* private void privateMessage_Click(object sender, EventArgs e)
+        {
+            if (clientSocket.Connected && !string.IsNullOrEmpty(userList.SelectedItem.ToString()))
+            {
+                sendMessage_textBox.Text = "@" + userList.SelectedItem.ToString() + " ";
+            }
+        }*/
     }
 }

@@ -53,6 +53,7 @@
             this.refreshMainChat = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
+            this.privateMessage = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // sendMessage_textBox
@@ -134,8 +135,7 @@
             this.userList.Name = "userList";
             this.userList.Size = new System.Drawing.Size(146, 212);
             this.userList.TabIndex = 9;
-            this.userList.SelectedIndexChanged += new System.EventHandler(this.userList_SelectedIndexChanged);
-            // 
+            //
             // label3
             // 
             this.label3.AutoSize = true;
@@ -289,11 +289,22 @@
             this.label9.TabIndex = 25;
             this.label9.Text = "Choose room:";
             // 
+            // privateMessage
+            // 
+            this.privateMessage.Location = new System.Drawing.Point(67, 263);
+            this.privateMessage.Name = "privateMessage";
+            this.privateMessage.Size = new System.Drawing.Size(94, 23);
+            this.privateMessage.TabIndex = 26;
+            this.privateMessage.Text = "Private Message";
+            this.privateMessage.UseVisualStyleBackColor = true;
+            //this.privateMessage.Click += new System.EventHandler(this.privateMessage_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(955, 525);
+            //this.Controls.Add(this.privateMessage);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.refreshMainChat);
@@ -328,31 +339,32 @@
         }
 
         #endregion
-        private System.Windows.Forms.TextBox sendMessage_textBox;
-        private System.Windows.Forms.Button sendButton;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ListBox listOfRooms;
-        private System.Windows.Forms.Button createRoom;
-        private System.Windows.Forms.TextBox createRoom_textBox;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button joinButton;
-        private System.Windows.Forms.ListBox userList;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.ListBox chatMainWindow;
-        private System.Windows.Forms.Button refreshUserList;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button serverDisconnect;
-        private System.Windows.Forms.Button serverConnect;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox serverNamePort;
-        private System.Windows.Forms.Button refreshRooms;
-        private System.Windows.Forms.Button leaveRoom;
-        private System.Windows.Forms.Button refreshMainChat;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Label label9;
+        public System.Windows.Forms.TextBox sendMessage_textBox;
+        public System.Windows.Forms.Button sendButton;
+        public System.Windows.Forms.Label label1;
+        public System.Windows.Forms.ListBox listOfRooms;
+        public System.Windows.Forms.Button createRoom;
+        public System.Windows.Forms.TextBox createRoom_textBox;
+        public System.Windows.Forms.Label label2;
+        public System.Windows.Forms.Button joinButton;
+        public System.Windows.Forms.ListBox userList;
+        public System.Windows.Forms.Label label3;
+        public System.Windows.Forms.Label label4;
+        public System.Windows.Forms.Label label5;
+        public System.Windows.Forms.Label label6;
+        public System.Windows.Forms.ListBox chatMainWindow;
+        public System.Windows.Forms.Button refreshUserList;
+        public System.Windows.Forms.Label label7;
+        public System.Windows.Forms.Button serverDisconnect;
+        public System.Windows.Forms.Button serverConnect;
+        public System.Windows.Forms.Label label8;
+        public System.Windows.Forms.TextBox serverNamePort;
+        public System.Windows.Forms.Button refreshRooms;
+        public System.Windows.Forms.Button leaveRoom;
+        public System.Windows.Forms.Button refreshMainChat;
+        public System.Windows.Forms.ComboBox comboBox1;
+        public System.Windows.Forms.Label label9;
+        public System.Windows.Forms.Button privateMessage;
     }
 }
 
