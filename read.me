@@ -1,0 +1,294 @@
+Mykhailo Tsvietukhin CS 594 Internetworking Protocols.
+
+
+Abstract This memo describes the communication protocol for an IRC-style client/server system for the Internetworking Protocols class at Portland State University. 
+
+
+Table of Contents 
+1. Introduction...................................................2 
+2. Conventions used in this document..............................2 
+3. Basic Information..............................................2 
+4. Message Infrastructure.........................................2 
+4.1. Generic Message Format....................................2 
+4.1.1. Field definitions:...................................2
+4.1.2. Operation Codes (opcodes)............................2
+4.2. Error Messages............................................3
+4.2.1. Usage................................................3
+4.2.2. Field definitions:...................................3 
+4.2.3. Error Codes..........................................3 
+4.3. Keepalive Messages........................................3
+5. Label Semantics................................................3
+6. Client Messages................................................3 
+6.1. First message sent to the server..........................4 
+6.1.1. Usage................................................4 
+6.1.2. Field Definitions....................................4 
+6.2. Listing Rooms.............................................4 
+6.2.1. Usage................................................4
+6.2.2. Response.............................................4 
+6.3. Joining and Creating Rooms................................8 
+6.3.1. Usage................................................4
+6.3.2. Field Definitions....................................4
+6.4. Leaving a Room............................................4
+6.4.1. Usage................................................4
+6.4.2. Field Definitions....................................4
+6.5. Sending Messages..........................................4 
+6.5.1. Usage................................................5 
+6.5.2. Field Definitions...................................5
+7. Server Messages...............................................5
+7.1. Listing Response.........................................5
+7.1.1. Usage...............................................5
+7.1.2. Field definitions...................................5
+7.2. Forwarding Messages to Clients...........................5
+7.2.1. Usage...............................................5
+7.2.2. Field Definitions...................................5
+8. Error Handling................................................5
+9. "Extra" Features Supported....................................5
+10. Conclusion & Future Work.....................................6
+
+
+
+
+
+
+
+
+1. Introduction
+
+
+This project is a client-server N:1 communication IRC chat. Where server connects multiple clients together using socket and TCP reliable protocol. All users can join multiple rooms or leave them. They can send message to a room and all other users can see it. Clients can create a room or jon any existing room. Any client can see names of all other clients via the same room. 
+
+
+2. Conventions used in this document..............................3 
+
+
+None
+
+
+3. Basic Information..............................................3 
+
+
+All communication is done in TCP-IP protocol using socket 8888. Windows form provided to each client. All request are synchronous and made by clients when they click a button. Main chat window has a refresh button to update messages that is done by other clients. Every request has specific button in UI that do request on user behalf this protect system from users that don’t know what they are doing. To be able to run chat user required to use windows system and has port 8888 opened for incoming and outgoing messages.
+
+
+4. Message Infrastructure
+4.1. Generic Message Format
+
+
+Message first combined as JSON object with ENUM code as a header 
+{ “command” : “code 0”,
+  “Message”, ”value1”,	
+  “Other”, ”value2”,
+}
+
+
+Then it serialized and send to client or server and deserialized on other side. Saved to JSON object and used in a program. 
+
+
+4.1.1. Field definitions
+
+
+Command - is a code that is used to determined a integer for a specific command on a server to execute. 
+Message - is a body of a message that is need to be saved in data structure
+Other - is reserved if any additional information is needed to be sent.
+
+
+4.1.2. Operation Codes (opcodes)
+
+
+
+
+ public enum Command
+        {
+            NotConnected,
+            Error, //Error send by a server with error code
+            OK, //Server done operation successfully
+            SendMessage, //User sending message using button send
+            Create, //Create chat room 
+            RefreshCurrentRoom, //Get list of messages from a server
+            UpdateDropDown, //Get list of rooms current user connected
+            ListUsers, //Get user list connected to a current room
+            SetUser, //Set username to server
+            DisconnectClient, //Client request to be disconnected from a server
+            RefreshRooms, //Client request list of rooms existing on a server
+            JoinRoom, //Client wants to join a room
+            LeaveRoom, //Client wants to leave a room
+            SendFile
+        };
+
+
+4.2. Error Messages 
+
+
+Server can send JSON object with command Error to notify that command fails to execute messages that sends to chat window will be held on client side.
+
+
+4.2.1. Usage
+
+
+They can be used by client and server can send only OK or Error code. 
+
+
+4.2.2. Field definitions
+
+
+No error code client should know what happens if error exist.
+
+
+4.2.3. Error Codes
+
+
+None.
+
+
+4.3. Keepalive Messages
+
+
+Stream flushed after each request sended from server or a client. Connection creates only once per client and used until disconnect.
+
+
+5. Label Semantics
+
+
+Server code can’t be empty and must use existing ENUM object. Other codes are unpredicted errors. 
+
+
+6. Client Messages 
+6.1. First message sent to the server
+
+
+First client get username from user and send it to a server. Server responds OK after receiving message.
+
+
+6.1.1. Usage
+
+
+There is no way for user to be anonymous however user can choose any name even existing one.
+
+
+6.1.2. Field Definitions
+
+
+Messages messages = new Messages(); //New object of class Messages engine
+        private string userName = ""; //Each client has its own name identifier.
+        private string roomName; //Current room name saves here. Used for main chat.
+
+
+6.2. Listing Rooms
+
+
+private static Dictionary<string, ChatRoom> chatrooms = new Dictionary<string, ChatRoom>();
+
+
+6.2.1. Usage
+
+
+Creates map of room names and objects of rooms with messages and user list in it.
+
+
+6.3. Joining and Creating Rooms
+
+
+User need to add itself to a specific room object in a collection.
+
+
+6.3.2. Field Definitions
+
+
+private static string activeChatRoom = "";
+
+
+Name of the room currently active in main chat window.
+
+
+6.4. Leaving a Room
+
+
+Client needs to replace itself from collection on a leaving event.
+
+
+6.5. Sending Messages
+
+
+Messages sends by serialization JSON mechanism. Objects converted to string in JSON format and send to a client where it converts back to object.
+
+
+
+
+
+
+6.5.1. Usage
+This technique is very easy to use and save a lot of error prompt string conversion. 
+
+
+6.5.2. Field Definitions
+
+
+private ObservableCollection<string> userList; === List of users
+
+
+private ObservableCollection<string> messageList; === All messages stores here for each room
+public Dictionary<string, string> FileList { get; set; } ==== Files stores here before room destroys.
+private string name = ""; === Current room name to be able to find room in a loop. 
+
+
+7. Server Messages 
+7.1. Listing Response
+
+
+networkStream = clientSocket.GetStream();
+networkStream.Read(bytesFrom, 0, clientSocket.ReceiveBufferSize);
+dataFromClient = Encoding.ASCII.GetString(bytesFrom);
+dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("}") + 1);
+
+
+Message responce = JsonConvert.DeserializeObject<Message>(dataFromClient);
+
+
+7.1.1. Usage
+
+
+Stream converted to e NetworkStream for convenience and extended functionality. 
+response  is a deserialized object from a string. Objects are easy to use rather parsing text. 
+
+
+7.1.2. Field definitions
+
+
+NetworkStream networkStream; == Wrapper 
+        private TcpClient clientSocket; == TCP connection socket
+        private int clineNo; == counter
+        private static string userName = ""; == global user name of a latest connected client
+        private Object _lock = new Object(); == multithreaded protection mutex.
+
+
+7.2.2. Field Definitions
+
+
+Mesage object contains fields for convenient use
+
+
+8. Error Handling
+
+
+Client support or error handling and work with server responses ERROR messages displaying them to a client without stopping application. Server just notifies client if error occur.
+
+
+9. "Extra" Features Supported Note that file sharing is supported in addition to meeting the other remaining project criteria.
+
+
+10. Conclusion & Future Work
+
+
+This project makes a simple message passing over socket TCP/IP and connecting multiple clients. This project can accumulate tons of different ideas and extensions starting from broadcasting to all thread finishing mobile platform. 
+
+
+11. Security Considerations
+
+
+Security wasn’t an issue for this project but we will need to considerate it in commercial projects.  
+
+
+
+
+
+
