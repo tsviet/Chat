@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -35,7 +36,8 @@ namespace WindowsFormsApplication1
             DisconnectClient, //Client request to be disconnected from a server
             RefreshRooms, //Client request list of rooms existing on a server
             JoinRoom, //Client wants to join a room
-            LeaveRoom //Client wants to leave a room
+            LeaveRoom, //Client wants to leave a room
+            SendFile
         };
 
         public Form1()
@@ -316,12 +318,42 @@ namespace WindowsFormsApplication1
             }
         }
 
-       /* private void privateMessage_Click(object sender, EventArgs e)
+        private void attach_Click(object sender, EventArgs e)
         {
-            if (clientSocket.Connected && !string.IsNullOrEmpty(userList.SelectedItem.ToString()))
+            openFileDialog1.ShowDialog();
+            try
             {
-                sendMessage_textBox.Text = "@" + userList.SelectedItem.ToString() + " ";
+                Client.Message responce = IPC(Command.SendFile, File.ReadAllText(openFileDialog1.FileName), openFileDialog1.FileName);
+                if (responce != null && responce.command.HasFlag(Command.OK))
+                {
+                    msg("File " + openFileDialog1.FileName + " added! Click on it to download!");
+                }
+                else
+                {
+                    File.WriteAllText("F:/log.txt", openFileDialog1.FileName);
+                    msg("Fail to send a file!");
+                }
             }
-        }*/
+            catch (IOException) { File.WriteAllText("F:/log.txt", File.ReadAllText(openFileDialog1.FileName));  }
+        }
+
+        private void selectedIndexChanged(object sender, EventArgs e)
+        {
+            if (chatMainWindow.SelectedItem !=null && chatMainWindow.SelectedItem.ToString().Contains("Click on it to download!"))
+            {
+                saveFileDialog1.ShowDialog();
+                Client.Message responce = IPC(Command.SendFile, Regex.Match(chatMainWindow.SelectedItem.ToString(),
+                    @"(?is)File (.+?) added!").Groups[1].Value);
+                File.WriteAllText(saveFileDialog1.FileName, responce.message[0]);
+            }
+        }
+
+        /* private void privateMessage_Click(object sender, EventArgs e)
+         {
+             if (clientSocket.Connected && !string.IsNullOrEmpty(userList.SelectedItem.ToString()))
+             {
+                 sendMessage_textBox.Text = "@" + userList.SelectedItem.ToString() + " ";
+             }
+         }*/
     }
 }

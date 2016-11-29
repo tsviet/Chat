@@ -32,7 +32,8 @@ namespace Chat
             DisconnectClient, //Client request to be disconnected from a server
             RefreshRooms, //Client request list of rooms existing on a server
             JoinRoom, //Client wants to join a room
-            LeaveRoom //Client wants to leave a room
+            LeaveRoom, //Client wants to leave a room
+            SendFile
         };
 
         public Chat(TcpClient clientSocket)
@@ -133,6 +134,9 @@ namespace Chat
                             case Command.LeaveRoom:
                                 LeaveRoom(responce);
                                 break;
+                            case Command.SendFile:
+                                SendFile(responce);
+                                break;
                             default:
                                 RequestEmpty();
                                 break;
@@ -150,6 +154,21 @@ namespace Chat
             }//while
 
             Thread.CurrentThread.Abort();
+        }
+
+        private void SendFile(Message responce)
+        {
+            if (responce.other != null)
+            {
+                Server.AddFile(Server.GetActiveRoom(), responce.other, responce.message[0]);
+                Server.GetMessageList().Add("File " + responce.other + " added! Click on it to download!");
+                IPC(Command.OK);
+               
+            }
+            else
+            {
+                IPC(Command.OK, new List<string>() { Server.GetFile(Server.GetActiveRoom(), responce.message[0]) });
+            }
         }
 
         private void RequestEmpty()

@@ -12,15 +12,25 @@ namespace Chat
     public static class Server
     {
         private static Dictionary<string, ChatRoom> chatrooms = new Dictionary<string, ChatRoom>();
-        private static ObservableCollection<ChatRoom> roomList = new ObservableCollection<ChatRoom>();
         private static string activeChatRoom = "";
 
+        //Add file
+        internal static void AddFile(string chatroom, string filename, string file)
+        {
+            chatrooms[chatroom].FileList.Add(filename, file);
+        }
+
+        //Get file
+        internal static string GetFile(string chatroom, string filename)
+        {
+            return chatrooms[chatroom].FileList[filename];
+        }
 
         //Create room in a dictionary
         internal static void AddRoom(ChatRoom chatroom)
         {
             chatrooms.Add(chatroom.GetName(), chatroom);
-            roomList.Add(chatroom);
+           // roomList.Add(chatroom);
             activeChatRoom = chatroom.GetName();
         }
 

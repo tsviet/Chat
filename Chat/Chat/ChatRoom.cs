@@ -12,6 +12,7 @@ namespace Chat
         
         private ObservableCollection<string> userList;
         private ObservableCollection<string> messageList;
+        public Dictionary<string, string> FileList { get; set; }
         private string name = "";
 
         //Create object
@@ -19,6 +20,7 @@ namespace Chat
         {
             userList = new ObservableCollection<string>();
             messageList = new ObservableCollection<string>();
+            FileList = new Dictionary<string, string>();
             this.name = name;
         }
 
