@@ -71,7 +71,7 @@ namespace Chat
         }
 
         //Get list of messages
-        internal static ObservableCollection<string> GetUserList(string Room)
+        internal static ObservableCollection<string> GetUserListInRoom(string Room)
         {
             return chatrooms[Room].GetUserList();
         }

@@ -108,7 +108,7 @@ namespace WindowsFormsApplication1
                 sendMessage_textBox.Text = "";
                 sendMessage_textBox.Focus();
 
-                if (responce.command.HasFlag(Command.OK))
+                if (responce != null && responce.command.HasFlag(Command.OK))
                 {
                     //Message Sent
                     label7.Visible = true;
@@ -138,8 +138,8 @@ namespace WindowsFormsApplication1
             
             Client.Message responce = IPC(Command.Create, createRoom_textBox.Text);
 
-            if(responce.command == Command.NotConnected) { msg("Connect to server first!"); return; }
-            if (responce.command == Command.Error)
+            if(responce == null || responce.command == Command.NotConnected) { msg("Connect to server first!"); return; }
+            if (responce != null && responce.command == Command.Error)
             {
                 label6.Visible = true;
                 label6.Text = "Room already exist!";
@@ -148,7 +148,7 @@ namespace WindowsFormsApplication1
                 tread.Start();
 
             }
-            else if (responce.command.HasFlag(Command.OK))
+            else if (responce != null && responce.command.HasFlag(Command.OK))
             {
                 //Update list of rooms
                 //listOfRooms.Items.Add(name);
@@ -183,7 +183,7 @@ namespace WindowsFormsApplication1
 
             Client.Message responce = IPC(Command.ListUsers, userName);
 
-            if (responce.command.HasFlag(Command.OK))
+            if (responce != null && responce.command.HasFlag(Command.OK))
             {
                 List<string> mess = responce.message;
                 userList.Items.Clear();
@@ -193,15 +193,19 @@ namespace WindowsFormsApplication1
                 }
 
             }
+            else
+            {
+                msg("Can't list users!");
+            }
         }
 
         private void serverConnect_Click(object sender, EventArgs e)
         {
             
             string resp = messages.Connect(serverNamePort.Text.Split(':'));
-            Client.Message responce;
+            Client.Message responce = new Client.Message();
             msg(resp);
-            if (resp.Contains("connected"))
+            if (resp != null && resp.Contains("connected"))
             {
                 do
                 {
@@ -216,22 +220,30 @@ namespace WindowsFormsApplication1
         private void serverDisconnect_Click(object sender, EventArgs e)
         {
             Client.Message responce = IPC(Command.DisconnectClient, userName);
-            if (responce.command.HasFlag(Command.OK))
+            if (responce != null && responce.command.HasFlag(Command.OK))
             {
                 msg("You were disconected from server !");
+            }
+            else
+            {
+                msg("Connect to a server first!");
             }
         }
 
         private void refreshRooms_Click(object sender, EventArgs e)
         {
             Client.Message responce = IPC(Command.RefreshRooms, userName);
-            if (responce.command.HasFlag(Command.OK))
+            if (responce != null && responce.command.HasFlag(Command.OK))
             {
                 listOfRooms.Items.Clear();
                 foreach (var m in responce.message)
                 {
                     listOfRooms.Items.Add(m);
                 }
+            }
+            else
+            {
+                msg("No rooms found!");
             }
         }
 
@@ -242,7 +254,7 @@ namespace WindowsFormsApplication1
                 foreach (var item in listOfRooms.SelectedItems)
                 {
                     Client.Message responce = IPC(Command.JoinRoom, userName, item.ToString());
-                    if(!responce.command.HasFlag(Command.OK)) msg("Error: unnable to add you to selected room!");
+                    if(responce != null && !responce.command.HasFlag(Command.OK)) msg("Error: unnable to add you to selected room!");
                 }
             }
             catch (Exception)
@@ -258,7 +270,14 @@ namespace WindowsFormsApplication1
                 foreach (var item in listOfRooms.SelectedItems)
                 {
                     Client.Message responce = IPC(Command.LeaveRoom, userName, item.ToString());
-                    if (!responce.command.HasFlag(Command.OK)) msg("Error: unnable to leave selected room!");
+                    if (responce != null && responce.command.HasFlag(Command.OK))
+                    {
+                        msg("User " + userName + " leaved room " + item.ToString());
+                    }
+                    else
+                    {
+                        msg("Error: unnable to leave selected room!");
+                    }
                 }
             }
             catch (Exception)
@@ -270,7 +289,7 @@ namespace WindowsFormsApplication1
         private void refreshMainChat_Click(object sender, EventArgs e)
         {
             Client.Message responce = IPC(Command.RefreshCurrentRoom, userName);
-            if (responce.command.HasFlag(Command.OK))
+            if (responce != null && responce.command.HasFlag(Command.OK))
             {
                 chatMainWindow.Items.Clear();
                 foreach (var m in responce.message)
@@ -283,7 +302,7 @@ namespace WindowsFormsApplication1
         private void comboBox1_Click(object sender, EventArgs e)
         {
             Client.Message responce = IPC(Command.UpdateDropDown, userName);
-            if (responce.command.HasFlag(Command.OK))
+            if (responce != null && responce.command.HasFlag(Command.OK))
             {
                 comboBox1.Items.Clear();
                 foreach (var m in responce.message)

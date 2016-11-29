@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Chat.Chat;
 
-namespace Client
+namespace Chat
 {
     public class Message
     {
